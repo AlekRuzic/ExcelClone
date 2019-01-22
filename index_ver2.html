@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head runat="server">
+    <title>DHTML</title>
+    <style type="text/css">
+        .alphaColumn {
+            width: 60px;
+        }
+
+        #spreadsheetTable {
+            margin: auto;
+        }
+
+        #menuDiv {
+            width: 280px;
+            margin: auto;
+            padding-bottom: 10px;
+        }
+
+        @keyframes ants {
+            to {
+                background-position: 100% 100%
+            }
+        }
+
+        .marchingAnts {
+            border: 1px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+            repeating-linear-gradient(-45deg, black 0, black 25%, transparent 0, transparent 50%) 0 / .6em .6em;
+            animation: ants 3s linear infinite;
+        }
+
+        .invisible {
+            display: none;
+        }
+    </style>
+    <script language="JavaScript" type="text/javascript">
+        var alphaClass = document.getElementsByClassName('alphaColumn');
+        var selectedCell;
+        var numbers = 1234567890;
+        var letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        function createSpreadsheet() {
+            document.getElementById("spreadsheetDiv").innerHTML = buildTable(20, 10);
+            loadTable();
+        }
+
+        function buildTable(rows, columns) {
+            //create initial variable that contains all the text to create an HTML table
+            var tableHTML = "<table border='1' id='spreadsheetTable' width='650px' cellpadding='0' cellspacing='0' class='TableClass'><tr><th id='testing'></th>";
+            //add columns to the table with letters for IDs
+            for (j = 0; j < columns; j++) {
+                tableHTML += "<th>" + String.fromCharCode(j + 65) + "</th>";
+            }
+            //add rows to fill in the table
+            for (i = 1; i < rows; i++) {
+                tableHTML += "<tr>";
+                tableHTML += "<td id='0'" + i + " class='baseColumn'>" + i + "</td>";
+
+                for (j = 1; j <= columns; j++) {
+                    var letter = String.fromCharCode(j + 64)
+                    tableHTML += "<td id='" + letter + i + "' class='alphaColumn' onclick='clickCell(this)'></td>";
+                }
+                tableHTML += "</tr>";
+            }
+            tableHTML += "</table>";
+            return tableHTML;
+        }
+
+
+
+
+
+
+        //get the ID of the cell that is clicked on and pass it around
+        function clickCell(ref) {
+
+            //remove the marching ants from whichever cell it is currently on
+            for (i = 0; i < alphaClass.length; i++) {
+                alphaClass[i].classList.remove('marchingAnts');
+            }
+
+            //get the clicked cell's Id
+            selectedCell = ref.id;
+
+            //put marching ants around it
+            document.getElementById(selectedCell).classList.add('marchingAnts');
+
+            //update the textbox with the contents of the selected cell
+            if (document.getElementById(selectedCell).innerText == undefined) {
+                document.getElementById('txtInput').value = "";
+            }
+            else if (document.getElementById(selectedCell).innerText == document.getElementById(selectedCell).innerHTML) {
+                document.getElementById('txtInput').value = document.getElementById(selectedCell).innerText;
+            }
+            else {
+                let cellHTML = document.getElementById(selectedCell).innerHTML;
+                let cellInnerText = document.getElementById(selectedCell).innerText;
+                document.getElementById('txtInput').value = cellHTML.slice(cellHTML.indexOf('>') + 1, cellHTML.indexOf(')') + 1);
+
+
+                //document.getElementById('txtInput').value = document.getElementById(selectedCell).innerText;
+            }
+
+
+
+        }
+
+        function calculateSum(firstCell, secondCell) {
+            let firstCellColumn = firstCell.substr(0, 1);
+            let firstCellRow = firstCell.substr(1, 2);
+            let secondCellColumn = secondCell.substr(0, 1);
+            let secondCellRow = secondCell.substr(1, 2);
+
+            //if you're trying to calculate the sum of a column
+            if (firstCellColumn == secondCellColumn) {
+                var sumOutput = 0;
+
+                for (i = firstCellRow; i <= secondCellRow; i++) {
+                    var cellId = firstCellColumn + i;
+                    var cellText = document.getElementById(cellId).innerText;
+                    var cellValue = parseInt(document.getElementById(cellId).innerText);
+
+                    if (cellText == "") {
+                        var cellValue = 0;
+                    }
+
+                    else if (isNaN(cellValue) == true) {
+                        alert("You can only calculate the SUM of integers.");
+                        return;
+                    }
+                    var sumOutput = sumOutput + cellValue;
+                }
+                document.getElementById(selectedCell).innerHTML = "<span class='invisible'>=SUM(" + firstCell + ":" + secondCell + ")" + selectedCell + "</span>" + sumOutput;
+            }
+            //if you're trying to calculate the sum of a row
+            else if (firstCellRow == secondCellRow) {
+                var firstCellColumnCharCode = firstCellColumn.charCodeAt(0);
+                var secondCellColumnCharCode = secondCellColumn.charCodeAt(0);
+                var sumOutput = 0;
+
+                for (i = firstCellColumnCharCode; i<=secondCellColumnCharCode; i++) {
+                    var cellId = String.fromCharCode(i) + firstCellRow;
+
+                    var cellText = document.getElementById(cellId).innerText;
+                    var cellValue = parseInt(document.getElementById(cellId).innerText);
+
+                    if (cellText == "") {
+                        var cellValue = 0;
+                    }
+                    
+                    else if (isNaN(cellValue) == true) {
+                        alert("You can only calculate the SUM of integers.");
+                        return;
+                    }
+
+                    var sumOutput = sumOutput + cellValue;
+                }
+                document.getElementById(selectedCell).innerHTML = "<span class='invisible'>=SUM(" + firstCell + ":" + secondCell + ")" + selectedCell + "</span>" + sumOutput;
+            }
+        }
+
+
+
+        //put the textbox value into the cell
+        function editCell(selectedCell) {
+            let inputValue = document.getElementById('txtInput').value;
+            document.getElementById(selectedCell).innerText = inputValue;
+        }
+
+        function updateCell(firstCell, secondCell, formulaCell) {
+            let firstCellColumn = firstCell.substr(0, 1);
+            let firstCellRow = firstCell.substr(1, 2);
+            let secondCellColumn = secondCell.substr(0, 1);
+            let secondCellRow = secondCell.substr(1, 2);
+
+            //if you're trying to calculate the sum of a column
+            if (firstCellColumn == secondCellColumn) {
+                var sumOutput = 0;
+
+                for (i = firstCellRow; i <= secondCellRow; i++) {
+                    var cellId = firstCellColumn + i;
+                    var cellText = document.getElementById(cellId).innerText;
+                    var cellValue = parseInt(document.getElementById(cellId).innerText);
+
+                    if (cellText == "") {
+                        var cellValue = 0;
+                    }
+
+                    else if (isNaN(cellValue) == true) {
+                        alert("You can only calculate the SUM of integers.");
+                        return;
+                    }
+
+                    var sumOutput = sumOutput + cellValue;
+                }
+                document.getElementById(formulaCell).innerHTML = "<span class='invisible'>=SUM(" + firstCell + ":" + secondCell + ")" + formulaCell + "</span>" + sumOutput;
+            }
+            //if you're trying to calculate the sum of a row
+            else if (firstCellRow == secondCellRow) {
+                var firstCellColumnCharCode = firstCellColumn.charCodeAt(0);
+                var secondCellColumnCharCode = secondCellColumn.charCodeAt(0);
+                var sumOutput = 0;
+
+                for (i = firstCellColumnCharCode; i <= secondCellColumnCharCode; i++) {
+                    var cellId = String.fromCharCode(i) + firstCellRow;
+                    var cellText = document.getElementById(cellId).innerText;
+                    var cellValue = parseInt(document.getElementById(cellId).innerText);
+
+                    if (cellText == "") {
+                        var cellValue = 0;
+                    }
+
+                    else if (isNaN(cellValue) == true) {
+                        alert("You can only calculate the SUM of integers.");
+                        return;
+                    }
+
+                    var sumOutput = sumOutput + cellValue;
+                }
+                document.getElementById(formulaCell).innerHTML = "<span class='invisible'>=SUM(" + firstCell + ":" + secondCell + ")" + formulaCell + "</span>" + sumOutput;
+            }
+        }
+
+
+
+
+        //listen for keypress, specifically enter
+        document.addEventListener("keypress", function (e) {
+            //keyCode 13 = enter key
+            if (e.keyCode === 13) {
+                //store value from input text box into a variable
+                var inputValue = document.getElementById('txtInput').value;
+
+                //if a formula is entered, call calculateSum function
+                if (inputValue.substr(0, 4) == "=SUM") {
+                    var firstCell = inputValue.slice(inputValue.indexOf('(') + 1, inputValue.indexOf(':'));
+                    var secondCell = inputValue.slice(inputValue.indexOf(':') + 1, inputValue.indexOf(')'));
+                    calculateSum(firstCell, secondCell);
+                }
+
+                //if there is no formula, just update the cell's contents to what was in the input box
+                else {
+                    editCell(selectedCell);
+                }
+                //clear the textbox and unselect the cell
+                document.getElementById(selectedCell).classList.remove('marchingAnts');
+                document.getElementById('txtInput').value = "";
+
+                //loop through table cells and update all =SUM cells
+                for (let c = 1; c <= 10; c++) {
+                    for (let r = 1; r <= 19; r++) {
+                        let column = String.fromCharCode(c + 64);
+                        let id = column + r;
+                        var cellData = document.getElementById(id).innerHTML;
+
+                        //if the cell is a calculated field
+                        if (cellData.startsWith("<span") == true) {
+                            let firstCell = cellData.slice(cellData.indexOf('(') + 1, cellData.indexOf(':'));
+                            let secondCell = cellData.slice(cellData.indexOf(':') + 1, cellData.indexOf(')'));
+                            let formulaCell = cellData.slice(cellData.indexOf(')') + 1, cellData.indexOf('</'));
+                            //go to calculate function and re calculate in case anything in the original cells has changed
+                            updateCell(firstCell, secondCell, formulaCell);
+                        }
+
+                    }
+                }
+            }
+        });
+
+        //loop through table cells and save data in each cell
+        function saveTable() {
+            for (let c = 1; c <= 10; c++) {
+                for (let r = 1; r <= 19; r++) {
+                    let column = String.fromCharCode(c + 64);
+                    let id = column + r;
+                    let cellData = document.getElementById(id).innerHTML;
+
+                    localStorage.setItem(id, document.getElementById(id).innerHTML);
+                }
+            }
+        }
+
+        //loop back through table and put the saved value in each cell
+        function loadTable() {
+            for (let c = 1; c <= 10; c++) {
+                for (let r = 1; r <= 19; r++) {
+                    let column = String.fromCharCode(c + 64);
+                    let id = column + r;
+                    let cellData = document.getElementById(id).innerHTML;
+
+                    document.getElementById(id).innerHTML = localStorage.getItem(id);
+                }
+            }
+        }
+
+        //clear table and remove local storage data
+        function clearTable() {
+            for (let c = 1; c <= 10; c++) {
+                for (let r = 1; r <= 19; r++) {
+                    let column = String.fromCharCode(c + 64);
+                    let id = column + r;
+                    let cellData = document.getElementById(id).innerHTML;
+
+                    document.getElementById(id).innerHTML = "";
+                    //uncomment line below if you want the clear button to clear the local storage as well
+                    //localStorage.removeItem(id);
+                }
+            }
+        }
+
+
+    </script>
+</head>
+
+<body onload="createSpreadsheet()">
+    <div id="menuDiv">
+        <input id="btnLoad" type="button" value="Load" onclick="loadTable()" />
+        <input id="btnSave" type="button" value="Save" onclick="saveTable()" />
+        <input id="btnClear" type="button" value="Clear" onclick="clearTable()" />
+
+        <input type="text" id="txtInput" />
+    </div>
+
+    <div id="spreadsheetDiv">
+
+    </div>
+</body>
+
+</html>
